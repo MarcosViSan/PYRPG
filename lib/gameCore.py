@@ -24,6 +24,7 @@ class gameCore:
         running = True
 
         self.drawBackground()
+        self.drawScene()
         
         # main loop
         while running:
@@ -38,3 +39,36 @@ class gameCore:
         for img in range(len(self.background.image)):
             self.screen.blit(self.background.image[img], (0, 0))
             pygame.display.flip()
+
+    def drawScene(self):
+        floor = ['' for i in range(3)]
+        floor[0] = pygame.image.load(".\\assets\\nature-enviroment\\PNG\\Tiles\\tile23.png")
+        floor[1] = pygame.image.load(".\\assets\\nature-enviroment\\PNG\\Tiles\\tile22.png")
+        floor[2] = pygame.image.load(".\\assets\\nature-enviroment\\PNG\\Tiles\\tile24.png")
+
+        subFloor = ['' for i in range(3)]
+        subFloor[0] = pygame.image.load(".\\assets\\nature-enviroment\\PNG\\Tiles\\tile118.png")
+        subFloor[1] = pygame.image.load(".\\assets\\nature-enviroment\\PNG\\Tiles\\tile11.png")
+        subFloor[2] = pygame.image.load(".\\assets\\nature-enviroment\\PNG\\Tiles\\tile39.png")
+
+        windowSize = pygame.display.get_window_size()
+        xFloorPos = 0
+        yFloorPos = windowSize[1]*0.8
+        for i in range(9):
+            for j in range(len(floor)):
+                self.screen.blit(floor[j], (xFloorPos, yFloorPos))
+                xFloorPos += 48
+
+        xSubFloorPos = 0
+        ySubFloorPos = yFloorPos + 48
+        for j in range(3):
+            for i in range(27):
+                self.screen.blit(subFloor[j], (xSubFloorPos, ySubFloorPos))
+                xSubFloorPos += 48
+            ySubFloorPos += 48
+
+        pygame.display.flip()
+
+        
+
+            
