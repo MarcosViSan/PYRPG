@@ -1,5 +1,6 @@
 import lib.background as background
 import pygame
+import lib.player.player as player
 
 class gameCore:
     def __init__(self) -> None:
@@ -13,7 +14,11 @@ class gameCore:
         # create a surface on screen that has the size of 1280 x 720
         self.screen = pygame.display.set_mode((1280 ,720))
 
+        self.player = player.Player()
+
         self.background = background.Background()
+
+        self.clock = pygame.time.Clock()
 
 
     def main(self):
@@ -21,19 +26,16 @@ class gameCore:
         # initialize the pygame module
         
         # define a variable to control the main loop
-        running = True
+        self.running = True
 
         self.drawBackground()
         self.drawScene()
         
         # main loop
-        while running:
+        while self.running:
             # event handling, gets all event from the event queue
-            for event in pygame.event.get():
-                # only do something if the event is of type QUIT
-                if event.type == pygame.QUIT:
-                    # change the value to False, to exit the main loop
-                    running = False
+                self.update(pygame.event.get())
+                self.clock.tick(1)
 
     def drawBackground(self):
         for img in range(len(self.background.image)):
@@ -69,6 +71,33 @@ class gameCore:
 
         pygame.display.flip()
 
-        
 
-            
+    def setColisors(self):
+        windowWidth, windowHeight = pygame.display.get_window_size()
+        self.groundColisor = pygame.Rect(0, windowHeight*0.8, windowWidth, 48)
+
+
+    def update(self, events):
+        player.xAcc = 0
+        player.yAcc = 2
+        for event in events:
+                # only do something if the event is of type QUIT
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    self.running = False
+                    # change the value to False, to exit the main loop
+                if event.type == pygame.K_a:
+                    player.xAcc = -2
+                elif event.type == pygame.K_d:
+                    player.xAcc = 2
+
+                if event.type == pygame.K_SPACE:
+                    player.yAcc = -8
+                elif player.yAcc < 10:
+                    player.yAcc += 2
+        
+        self.drawPlayer(self.player.update())
+
+
+    def drawPlayer(self, player):
+        self.screen.blit(player.image, (player.xPos, player.yPos))
