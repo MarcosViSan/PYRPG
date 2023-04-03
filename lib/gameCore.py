@@ -78,8 +78,8 @@ class gameCore:
 
 
     def update(self, events):
-        player.xAcc = 0
-        player.yAcc = 2
+        self.player.xAcc = 0
+        self.player.yAcc = 2
         for event in events:
                 # only do something if the event is of type QUIT
                 if event.type == pygame.QUIT:
@@ -87,17 +87,13 @@ class gameCore:
                     self.running = False
                     # change the value to False, to exit the main loop
                 if event.type == pygame.K_a:
-                    player.xAcc = -2
+                    self.player.xAcc = -2
                 elif event.type == pygame.K_d:
-                    player.xAcc = 2
+                    self.player.xAcc = 2
 
                 if event.type == pygame.K_SPACE:
-                    player.yAcc = -8
-                elif player.yAcc < 10:
-                    player.yAcc += 2
-        
-        self.drawPlayer(self.player.update())
-
-
-    def drawPlayer(self, player):
-        self.screen.blit(player.image, (player.xPos, player.yPos))
+                    self.player.yAcc = -8
+                elif self.player.yAcc < 10:
+                    self.player.yAcc += 2
+        self.player.update()
+        self.screen.blit(self.player.image, (self.player.xPos, self.player.yPos))

@@ -19,8 +19,8 @@ class Player():
         selfColidLines = []
         self.image = None
         self.rect = None
-        self.xPos = 0
-        self.yPos = 0 
+        self.xPos = 10
+        self.yPos = 10
         self.xAcc = 0
         self.yAcc = 0
 
@@ -29,17 +29,18 @@ class Player():
         self.currentAnimation = 'standing'
 
         standingFrames = ['' for i in range(2)]
-        standingFrames[0] = pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-1.png")
-        standingFrames[1] = pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-2.png")
+        standingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-1.png"), 4)
+        standingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-2.png"), 4)
 
 
         walkingFrames = [ None for i in range(6)]
-        walkingFrames[0] = pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-1.png")
-        walkingFrames[1] = pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-2.png")
-        walkingFrames[2] = pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-3.png")
-        walkingFrames[3] = pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-4.png")
-        walkingFrames[4] = pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-5.png")
-        walkingFrames[5] = pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-6.png")
+        walkingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-1.png"), 4)
+        walkingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-2.png"), 4)
+        walkingFrames[2] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-3.png"), 4)
+        walkingFrames[3] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-4.png"), 4)
+        walkingFrames[4] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-5.png"), 4)
+        walkingFrames[5] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-6.png"), 4
+        )
 
         self.animation = {
             'standing': animationsSprite.StandingAnimation(standingFrames),
@@ -57,6 +58,8 @@ class Player():
 
         self.image, self.rect = self.getAnimationState()
 
+        print(self.yPos, self.xPos)
+
         return self
 
     def getAnimationState(self) -> pygame.Surface:
@@ -67,7 +70,7 @@ class Player():
         elif (self.xVelocity != 0):
             self.currentAnimation = 'walking'
     
-
+        print(self.currentAnimation)
         return self.animation[self.currentAnimation].update()
     
     def setPos(self):
