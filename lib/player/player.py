@@ -1,7 +1,6 @@
 import pygame
 import lib.player.animationsSprite as animationsSprite 
 
-
 MAX_X_VEL = (10, -10)
 MAX_Y_VEL = (10, -10)
 
@@ -18,7 +17,7 @@ class Player():
 
         self.direction = "r"
 
-        selfColidLines = []
+        self.colidLines =  [None for i in range(4)]
         self.image = None
         self.rect = None
         self.xPos = 10
@@ -62,9 +61,9 @@ class Player():
 
         self.image, self.rect = self.getAnimationState()
 
-        print(self.yPos, self.xPos)
-        print(self.yAcc, self.xAcc)
-        print(self.yVelocity, self.xVelocity)
+        # print(self.yPos, self.xPos)
+        # print(self.yAcc, self.xAcc)
+        # print(self.yVelocity, self.xVelocity)
 
         return self
 
@@ -72,7 +71,7 @@ class Player():
         if (self.xVelocity == 0 and self.yVelocity == 0):
             self.currentAnimation = 'standing'
         elif (self.xVelocity == 0 and self.yVelocity > 0):
-            self.currentAnimation = 'falling'
+            self.currentAnimation = 'standing'
         elif (self.xVelocity != 0):
             self.currentAnimation = 'walking'
 
@@ -82,7 +81,7 @@ class Player():
             self.direction = "l"
 
     
-        print(self.currentAnimation)
+        # print(self.currentAnimation)
         return self.animation[self.currentAnimation].update(self.direction == "l")
     
     def setPos(self):
@@ -105,9 +104,14 @@ class Player():
                 self.xVelocity = 0
 
         if (self.yVelocity > -10 and self.yAcc < 0):
-            self.xVelocity += self.xAcc
+            self.yVelocity += self.yAcc
         elif (self.yVelocity < 10 and self.yAcc > 0):
-            self.xVelocity += self.xAcc
+            self.yVelocity += self.yAcc
+
+        # self.colidLines[0] = pygame.li
+
+
+        
 
 
 
