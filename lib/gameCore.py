@@ -35,7 +35,9 @@ class gameCore:
         while self.running:
             # event handling, gets all event from the event queue
                 self.update(pygame.event.get())
-                self.clock.tick(1)
+                pygame.display.flip()
+                self.fps = 1000 / self.clock.tick(60)
+                print(self.fps)
 
     def drawBackground(self):
         for img in range(len(self.background.image)):
@@ -66,11 +68,8 @@ class gameCore:
         for j in range(3):
             for i in range(27):
                 self.screen.blit(subFloor[j], (xSubFloorPos, ySubFloorPos))
-                xSubFloorPos += 48
+                xSubFloorPos += 48  
             ySubFloorPos += 48
-
-        pygame.display.flip()
-
 
     def setColisors(self):
         windowWidth, windowHeight = pygame.display.get_window_size()
@@ -80,20 +79,26 @@ class gameCore:
     def update(self, events):
         self.player.xAcc = 0
         self.player.yAcc = 2
+
+        pressedKeys = pygame.key.get_pressed()
+
+        if pressedKeys[pygame.K_a]:
+            self.player.xAcc = -2
+        elif pressedKeys[pygame.K_d]:
+            self.player.xAcc = 2
+        else:
+            self.player.xAcc = 0
+        if pressedKeys[pygame.K_SPACE]:
+            self.player.yAcc = -8
+        elif self.player.yAcc < 10:
+            self.player.yAcc += 2
+    
         for event in events:
                 # only do something if the event is of type QUIT
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     self.running = False
                     # change the value to False, to exit the main loop
-                if event.type == pygame.K_a:
-                    self.player.xAcc = -2
-                elif event.type == pygame.K_d:
-                    self.player.xAcc = 2
 
-                if event.type == pygame.K_SPACE:
-                    self.player.yAcc = -8
-                elif self.player.yAcc < 10:
-                    self.player.yAcc += 2
         self.player.update()
         self.screen.blit(self.player.image, (self.player.xPos, self.player.yPos))

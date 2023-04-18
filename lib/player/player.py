@@ -16,6 +16,8 @@ class Player():
             'colid-l': 0
         }
 
+        self.direction = "r"
+
         selfColidLines = []
         self.image = None
         self.rect = None
@@ -23,23 +25,25 @@ class Player():
         self.yPos = 10
         self.xAcc = 0
         self.yAcc = 0
+        self.xMinVelocity = 0
+        self.xMaxVelocity = 0
 
 
         #Propriedades Privadas
         self.currentAnimation = 'standing'
 
         standingFrames = ['' for i in range(2)]
-        standingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-1.png"), 4)
-        standingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-2.png"), 4)
+        standingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-1.png"), 2.5)
+        standingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-2.png"), 2.5)
 
 
         walkingFrames = [ None for i in range(6)]
-        walkingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-1.png"), 4)
-        walkingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-2.png"), 4)
-        walkingFrames[2] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-3.png"), 4)
-        walkingFrames[3] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-4.png"), 4)
-        walkingFrames[4] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-5.png"), 4)
-        walkingFrames[5] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-6.png"), 4
+        walkingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-1.png"), 2.5)
+        walkingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-2.png"), 2.5)
+        walkingFrames[2] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-3.png"), 2.5)
+        walkingFrames[3] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-4.png"), 2.5)
+        walkingFrames[4] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-5.png"), 2.5)
+        walkingFrames[5] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-6.png"), 2.5
         )
 
         self.animation = {
@@ -59,19 +63,27 @@ class Player():
         self.image, self.rect = self.getAnimationState()
 
         print(self.yPos, self.xPos)
+        print(self.yAcc, self.xAcc)
+        print(self.yVelocity, self.xVelocity)
 
         return self
 
     def getAnimationState(self) -> pygame.Surface:
         if (self.xVelocity == 0 and self.yVelocity == 0):
             self.currentAnimation = 'standing'
-        elif (self.xVelocity == 0 and self.yVelocity < 0):
+        elif (self.xVelocity == 0 and self.yVelocity > 0):
             self.currentAnimation = 'falling'
         elif (self.xVelocity != 0):
             self.currentAnimation = 'walking'
+
+        if (self.xVelocity > 0):
+            self.direction = "r"
+        elif (self.xVelocity < 0):
+            self.direction = "l"
+
     
         print(self.currentAnimation)
-        return self.animation[self.currentAnimation].update()
+        return self.animation[self.currentAnimation].update(self.direction == "l")
     
     def setPos(self):
         self.xPos += self.xVelocity * (int)(not self.Colid['colid-r'])
@@ -80,10 +92,17 @@ class Player():
 
     def phyAttualize(self):
 
-        if (self.xVelocity > -10 and self.xAcc < 0):
+        if (self.xVelocity > self.xMinVelocity and self.xAcc < 0):
             self.xVelocity += self.xAcc
-        elif (self.xVelocity < 10 and self.xAcc > 0):
+        elif (self.xVelocity < self.xMaxVelocity and self.xAcc > 0):
             self.xVelocity += self.xAcc
+        elif (self.xAcc == 0):
+            if(self.xVelocity < 0):
+                self.xVelocity += 4
+            if(self.xVelocity > 0):
+                self.xVelocity += -4
+            if(self.xVelocity == -2 or self.xVelocity == 2):
+                self.xVelocity = 0
 
         if (self.yVelocity > -10 and self.yAcc < 0):
             self.xVelocity += self.xAcc
