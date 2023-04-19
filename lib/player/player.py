@@ -17,7 +17,7 @@ class Player():
 
         self.direction = "r"
 
-        self.colidLines =  [None for i in range(4)]
+        # self.colidLines =  [None for i in range(4)]
         self.image = None
         self.rect = None
         self.xPos = 10
@@ -56,7 +56,7 @@ class Player():
 
     def update(self):
         self.phyAttualize()
-        self.setPos()
+        self.move()
         self.getAnimationState()
 
         self.image, self.rect = self.getAnimationState()
@@ -84,11 +84,17 @@ class Player():
         # print(self.currentAnimation)
         return self.animation[self.currentAnimation].update(self.direction == "l")
     
-    def setPos(self):
-        self.xPos += self.xVelocity * (int)(not self.Colid['colid-r'])
+    def move(self):
+        if (self.xVelocity > 0):
+            self.xPos += self.xVelocity * (int)(not self.Colid['colid-r'])
+        elif (self.xVelocity < 0):
+            self.xPos += self.xVelocity * (int)(not self.Colid['colid-l'])
 
-        self.yPos += self.yVelocity * (int)(not self.Colid['colid-t'])
-
+        if (self.yVelocity > 0):
+            self.yPos += self.yVelocity * (int)(not self.Colid['colid-b'])
+        elif (self.yVelocity < 0):
+            self.yPos += self.yVelocity * (int)(not self.Colid['colid-t'])
+  
     def phyAttualize(self):
 
         if (self.xVelocity > self.xMinVelocity and self.xAcc < 0):
