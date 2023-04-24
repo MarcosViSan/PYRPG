@@ -1,12 +1,12 @@
-import lib.background as background
+import lib.scene.background as background
 import pygame
 import lib.player.player as player
 import lib.camera as camera
-import lib.scene as scene
+import lib.scene.scene as scene
 
 from pygame.locals import *
 
-FLAGS =FULLSCREEN | DOUBLEBUF
+FLAGS = DOUBLEBUF
 
 
 class gameOrquestrator:
@@ -17,6 +17,9 @@ class gameOrquestrator:
         # load and set the logo
         pygame.display.set_icon(self.logo)
         pygame.display.set_caption("Project RPG")
+
+        self.chunksGroup = []
+        self.chunksY = 200
 
         # create a surface on screen that has the size of 1280 x 720
         self.screen = pygame.display.set_mode((1280 ,720), FLAGS , 8)
@@ -81,12 +84,21 @@ class gameOrquestrator:
 
         self.screen.blit(self.player.image, (self.player.xScreenPos, self.player.yScreenPos))
 
+        for i in range(len(self.chunksGroup)):
+            chunkTiles = self.chunksGroup[i].Tiles.sprites()
+            for j in range(len(chunkTiles)):
+                self.screen.blit(chunkTiles[i].image, (chunkTiles[i].xPos , chunkTiles.yPos - self.camera.yPos))
+
 
     def updateScene(self):
         self.fixGround.update()
         
         self.fixGround.xScreenPos = self.fixGround.xPos - self.camera.xPos
         self.fixGround.yScreenPos = self.camera.yPos - self.fixGround.yPos
+
+        if (self.player.yPos >= self.chunksY):
+            self.generateChunk()
+            # self.destroyChunk()
 
     def updateCamera(self):
         self.camera.xAcc = 0
@@ -125,7 +137,7 @@ class gameOrquestrator:
             self.player.xAcc = 0
 
         if pressedKeys[pygame.K_SPACE] and not self.player.Colid['ncolid-b']:
-            self.player.yAcc = 8
+            self.player.yAcc = 16
         elif self.player.yAcc > -10:
             self.player.yAcc = -1
     
@@ -145,7 +157,7 @@ class gameOrquestrator:
         self.player.Colid['ncolid-b'] = 1
 
         print((str)(self.player.rect.size))
-        if (self.fixGround.colisor.clipline((self.player.xPos, self.player.yPos - self.player.rect.size[1]), (self.player.xPos + self.player.rect.size[0], self.player.yPos - self.player.rect.size[1]))):
+        if (self.fixGround.colisor.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1] * 0.9)), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1] * 0.9)))):
             self.player.Colid['ncolid-b'] = 0
 
     def drawColisors(self):
@@ -153,13 +165,8 @@ class gameOrquestrator:
         pygame.draw.line(self.screen, (190, 0, 0),(self.player.xScreenPos, self.player.yScreenPos + self.player.rect.size[1]), (self.player.xScreenPos + self.player.rect.size[0], self.player.yScreenPos + self.player.rect.size[1]))
         pygame.draw.rect(self.screen, (0, 190, 0), pygame.rect.Rect(self.fixGround.xScreenPos, self.fixGround.yScreenPos, (self.fixGround.blockArraySize * 576), 12))
 
+    def generateChunk(self):
 
-    
-
-
-
-    
-        
-    
-
+        self.chunksGroup.append(scene.Chunk().genChunk(self.chunksY))
+        self.chunksY += 1600
 

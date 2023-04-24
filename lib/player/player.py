@@ -21,7 +21,7 @@ class Player():
         self.image = None
         self.rect = None
         self.xPos = 500
-        self.yPos = 500
+        self.yPos = 199
         self.xAcc = 0
         self.yAcc = 0
 
