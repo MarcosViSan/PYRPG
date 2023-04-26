@@ -19,7 +19,7 @@ class gameOrquestrator:
         pygame.display.set_caption("Project RPG")
 
         self.chunksGroup = []
-        self.chunksY = 200
+        self.chunksY = 160
 
         # create a surface on screen that has the size of 1280 x 720
         self.screen = pygame.display.set_mode((1280 ,720), FLAGS , 8)
@@ -46,9 +46,10 @@ class gameOrquestrator:
     def main(self):
 
         # initialize the pygame module
-        
+        pygame.init()
         # define a variable to control the main loop
         self.running = True
+        pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
         
         # main loop
         while self.running:
@@ -60,7 +61,8 @@ class gameOrquestrator:
                 self.drawScene()
                 self.drawColisors()
 
-                gameInfoText = "FPS: " + (str)((int)(self.fps)) + "   PlayerPOS: " + (str)(self.player.xPos) + "   " + (str)(self.player.yPos) + "    " + (str)(self.player.yMaxVelocity) + "   " + (str)(self.player.yVelocity) + "   CamPOS: " + (str)(self.camera.xPos) + "   " + (str)(self.camera.yPos) 
+
+                gameInfoText = "FPS: " + (str)((int)(self.fps)) + "   PlayerPOS: " + (str)(self.player.xPos) + "   " + (str)(self.player.yPos) + "    " + (str)(self.player.yMaxVelocity) + "   " + (str)(self.player.yVelocity) + "   CamPOS: " + (str)(self.camera.xPos) + "   " + (str)(self.camera.yPos) + "     Chunks: " + str(len(self.chunksGroup))
                 
                 self.gameInfo = self.font.render(gameInfoText, True, (199, 0, 0))
                 
@@ -81,14 +83,14 @@ class gameOrquestrator:
             self.screen.blit(self.fixGround.floorImg, (tempXPos, (self.camera.yPos - self.fixGround.yPos)))
             tempXPos += 576
 
-
-        self.screen.blit(self.player.image, (self.player.xScreenPos, self.player.yScreenPos))
-
         for i in range(len(self.chunksGroup)):
             chunkTiles = self.chunksGroup[i].Tiles.sprites()
             for j in range(len(chunkTiles)):
-                self.screen.blit(chunkTiles[i].image, (chunkTiles[i].xPos , chunkTiles.yPos - self.camera.yPos))
+                self.screen.blit(chunkTiles[j].image, (chunkTiles[j].xPos , (self.camera.yPos - chunkTiles[j].yPos)))
+                # print(str(chunkTiles[i].xPos) + " " + str(chunkTiles[i].yPos))
+                # print('drawed' + str(j)
 
+        self.screen.blit(self.player.image, (self.player.xScreenPos, self.player.yScreenPos))
 
     def updateScene(self):
         self.fixGround.update()
@@ -96,7 +98,7 @@ class gameOrquestrator:
         self.fixGround.xScreenPos = self.fixGround.xPos - self.camera.xPos
         self.fixGround.yScreenPos = self.camera.yPos - self.fixGround.yPos
 
-        if (self.player.yPos >= self.chunksY):
+        if (self.player.yPos >= self.chunksY - 400):
             self.generateChunk()
             # self.destroyChunk()
 
@@ -116,16 +118,16 @@ class gameOrquestrator:
         self.player.xAcc = 0
         self.player.yAcc = 2
 
-        self.player.xMaxVelocity = 3
-        self.player.xMinVelocity = -3
+        self.player.xMaxVelocity = 6
+        self.player.xMinVelocity = -6
 
 
-        self.player.yMaxVelocity = 6
-        self.player.yMinVelocity = -6
+        self.player.yMaxVelocity = 8
+        self.player.yMinVelocity = - 8
 
 
-        self.camera.yMinVelocity = self.player.yMinVelocity - 1
-        self.camera.yMaxVelocity = self.player.yMaxVelocity + 1
+        self.camera.yMinVelocity = self.player.yMinVelocity - 4
+        self.camera.yMaxVelocity = self.player.yMaxVelocity + 4
 
         pressedKeys = pygame.key.get_pressed()
 
@@ -136,8 +138,9 @@ class gameOrquestrator:
         else:
             self.player.xAcc = 0
 
-        if pressedKeys[pygame.K_SPACE] and not self.player.Colid['ncolid-b']:
-            self.player.yAcc = 16
+        if pressedKeys[pygame.K_SPACE]  and self.player.canJump:
+            self.player.yAcc = 22 if (self.player.yAcc > 4) else 18  
+            self.player.canJump = 0
         elif self.player.yAcc > -10:
             self.player.yAcc = -1
     
@@ -147,6 +150,9 @@ class gameOrquestrator:
                     pygame.quit()
                     self.running = False
                     # change the value to False, to exit the main loop
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_SPACE:
+                        self.player.canJump = 1
 
         self.player.update()
 
@@ -159,6 +165,12 @@ class gameOrquestrator:
         print((str)(self.player.rect.size))
         if (self.fixGround.colisor.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1] * 0.9)), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1] * 0.9)))):
             self.player.Colid['ncolid-b'] = 0
+        else:
+            for Chunk in self.chunksGroup:
+                for Tile in Chunk.Tiles: 
+                    if (Tile.rect.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1] * 0.9)), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1] * 0.9)))):
+                        self.player.Colid['ncolid-b'] = 0
+
 
     def drawColisors(self):
         # pygame.draw.rect(self.screen, (0,0,0, 0.2), pygame.rect.Rect(0, 0, 1280, 720))
@@ -168,5 +180,8 @@ class gameOrquestrator:
     def generateChunk(self):
 
         self.chunksGroup.append(scene.Chunk().genChunk(self.chunksY))
-        self.chunksY += 1600
+        self.chunksY += 1300
+
+        if (len(self.chunksGroup) > 5):
+            self.chunksGroup.pop(0)
 
