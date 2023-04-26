@@ -23,12 +23,12 @@ class Camera():
             self.yVelocity += self.yAcc
         elif (self.yVelocity < self.yMaxVelocity and self.yAcc > 0):
             self.yVelocity += self.yAcc
-        elif (self.xAcc == 0):
+        elif (self.yAcc == 0):
             if(self.yVelocity < 0):
-                self.yVelocity += 4
+                self.yVelocity += 3
             if(self.yVelocity > 0):
-                self.yVelocity += -4
-            if(self.yVelocity == -2 or self.yVelocity == 2):
+                self.yVelocity += -3
+            if(self.yVelocity >= -2 or self.yVelocity <= 2):
                 self.yVelocity = 0
 
         self.xPos += self.xVelocity

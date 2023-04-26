@@ -20,14 +20,20 @@ class FixGround(pygame.sprite.Sprite):
        self.colisor.update(self.xPos, self.yPos, (self.blockArraySize * 576), 10)
 
 class TileGround(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos: tuple[int, int]):
+
+        super().__init__()
         self.xPos = pos[0]
         self.yPos = pos[1]
 
         self.xScreenPos = 0
         self.yScreenPos = 0
 
-        self.tileImg = pygame.image.load("assets\\nature-enviroment\\PNG\\TileNvl1.png").convert()
+        self.image = pygame.image.load("assets\\nature-enviroment\\PNG\\TileNvl1.png").convert()
+        
+        self.rect = self.image.get_rect()
+        print(self.rect.size)
+        self.rect.move_ip(self.xPos, self.yPos)
 
 
 
@@ -37,15 +43,8 @@ class Chunk():
 
     def genChunk(self, initY: int):
         for i in range(8):
-            self.Tiles.add(TileGround((random.randint(1, 1280),(initY))))
-            self.Tiles.add(TileGround((random.randint(1, 1280),(initY))))
-            initY += 200
+            self.Tiles.add(TileGround((random.randint(1, 1136), initY)))
+            self.Tiles.add(TileGround((random.randint(1, 1136), initY)))
+            initY += 160
 
         return self
-
-
-
-        
-
-
-

@@ -21,7 +21,7 @@ class Player():
         self.image = None
         self.rect = None
         self.xPos = 500
-        self.yPos = 199
+        self.yPos = 100
         self.xAcc = 0
         self.yAcc = 0
 
@@ -61,6 +61,8 @@ class Player():
         self.xVelocity = 0
         self.yVelocity = 0
 
+        self.canJump = 1
+
     def update(self):
         self.phyAttualize()
         self.move()
@@ -71,6 +73,7 @@ class Player():
         # print(self.yPos, self.xPos)
         # print(self.yAcc, self.xAcc)
         # print(self.yVelocity, self.xVelocity)
+        
 
         return self
 
