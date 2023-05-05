@@ -7,7 +7,7 @@ import lib.scene.scene as scene
 from pygame.locals import *
 
 FPS = 60
-FLAGS = FULLSCREEN | DOUBLEBUF
+FLAGS = DOUBLEBUF
 
 
 
@@ -64,7 +64,7 @@ class gameOrquestrator:
                 # self.drawColisors()
 
 
-                gameInfoText = "FPS: " + (str)((int)(self.fps)) + "   PlayerPOS: " + (str)(self.player.xPos) + "   " + (str)(self.player.yPos) + "    " + (str)(self.player.yMaxVelocity) + "   " + (str)(self.player.yVelocity) + "   CamPOS: " + (str)(self.camera.xPos) + "   " + (str)(self.camera.yPos) + "     Chunks: " + str(len(self.chunksGroup))
+                gameInfoText = "FPS: " + (str)((int)(self.fps)) + "   PlayerPOS: " + (str)(self.player.xPos) + "   " + (str)(self.player.yPos) + "    " + (str)(self.player.yMinVelocity) + "   " + (str)(self.player.yVelocity) + "   CamPOS: " + (str)(self.camera.xPos) + "   " + (str)(self.camera.yPos) + "     Chunks: " + str(len(self.chunksGroup))
                 
                 self.gameInfo = self.font.render(gameInfoText, True, (199, 0, 0))
                 
@@ -124,18 +124,18 @@ class gameOrquestrator:
         self.player.xMinVelocity = -6
 
 
-        self.player.yMaxVelocity = 8
-        self.player.yMinVelocity = - 8
+        self.player.yMaxVelocity = 16
+        self.player.yMinVelocity = -8 if self.player.preColid['nprecolid-b'] else -2
 
 
-        self.camera.yMinVelocity = self.player.yMinVelocity + 0.5
-        self.camera.yMaxVelocity = self.player.yMaxVelocity - 0.5
+        self.camera.yMinVelocity = -7.5
+        self.camera.yMaxVelocity = 7.5
 
         pressedKeys = pygame.key.get_pressed()
 
-        if pressedKeys[pygame.K_a]:
+        if pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]:
             self.player.xAcc = -2
-        elif pressedKeys[pygame.K_d]:
+        elif pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]:
             self.player.xAcc = 2
         else:
             self.player.xAcc = 0
@@ -163,15 +163,27 @@ class gameOrquestrator:
 
     def checkColision(self):        
         self.player.Colid['ncolid-b'] = 1
+        self.player.preColid['nprecolid-b'] = 1
 
-        print((str)(self.player.rect.size))
-        if (self.fixGround.colisor.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1] * 0.9)), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1] * 0.9)))):
+        # print(self.fixGround.colisor)
+
+        # print((str)(self.player.rect.size))
+
+        preColisionFix = self.player.preBCollid.colliderect(self.fixGround.colisor)
+        clipedLine = self.fixGround.colisor.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1])), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1])))
+
+        print(preColisionFix)
+        if (clipedLine):
             self.player.Colid['ncolid-b'] = 0
-        else:
+        elif (preColisionFix):
+            self.player.preColid['nprecolid-b'] = 0
+        else:    
             for Chunk in self.chunksGroup:
                 for Tile in Chunk.Tiles: 
-                    if (Tile.rect.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1] * 0.75)), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1] * 0.76)))):
+                    if (Tile.rect.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1])), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1])))):
                         self.player.Colid['ncolid-b'] = 0
+                    elif (Tile.rect.colliderect(self.player.preBCollid)):
+                        self.player.preColid['nprecolid-b'] = 0
 
 
     def drawColisors(self):

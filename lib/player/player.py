@@ -14,6 +14,12 @@ class Player():
             'ncolid-r': 1,
             'ncolid-l': 1
         }
+        self.preColid = {
+            'nprecolid-t': 1,
+            'nprecolid-b': 1,
+            'nprecolid-r': 1,
+            'nprecolid-l': 1
+        }
 
         self.direction = "r"
 
@@ -24,6 +30,8 @@ class Player():
         self.yPos = 100
         self.xAcc = 0
         self.yAcc = 0
+
+        self.preBCollid = pygame.rect.Rect(0,0,0,0)
 
         self.xScreenPos = 0
         self.yScreenPos = 0
@@ -69,6 +77,7 @@ class Player():
         self.getAnimationState()
 
         self.image, self.rect = self.getAnimationState()
+        self.preBCollid.update(self.xPos, (self.yPos - self.rect.size[1] * 0.75),self.rect.size[0], -20)
 
         # print(self.yPos, self.xPos)
         # print(self.yAcc, self.xAcc)
@@ -133,6 +142,13 @@ class Player():
             self.yVelocity += self.yAcc * self.Colid['ncolid-b']
         elif (self.yVelocity < self.yMaxVelocity and self.yAcc > 0):
             self.yVelocity += self.yAcc * self.Colid['ncolid-t']
+        
+        if (self.yVelocity < self.yMinVelocity):
+            self.yVelocity += 4
+            print("---------------------> " + (str)(self.yVelocity))
+        elif (self.yVelocity > self.yMaxVelocity):
+            self.yVelocity -= 4
+
 
         # self.colidLines[0] = pygame.li
 

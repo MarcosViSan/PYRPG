@@ -17,7 +17,7 @@ class FixGround(pygame.sprite.Sprite):
         self.colisor = pygame.rect.Rect(0, 0, 0, 0)
 
     def update(self):
-       self.colisor.update(self.xPos, self.yPos, (self.blockArraySize * 576), 10)
+       self.colisor.update(self.xPos, self.yPos, (self.blockArraySize * 576), -10)
 
 class TileGround(pygame.sprite.Sprite):
     def __init__(self, pos: tuple[int, int]):
@@ -32,8 +32,8 @@ class TileGround(pygame.sprite.Sprite):
         self.image = pygame.image.load("assets\\nature-enviroment\\PNG\\TileNvl1.png").convert()
         
         self.rect = self.image.get_rect()
-        print(self.rect.size)
-        self.rect.move_ip(self.xPos, self.yPos)
+        # print(self.rect.size)
+        self.rect.update(self.xPos, self.yPos, 144, -10)
 
 
 
