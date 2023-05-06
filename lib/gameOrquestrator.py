@@ -140,7 +140,7 @@ class gameOrquestrator:
         else:
             self.player.xAcc = 0
 
-        if pressedKeys[pygame.K_SPACE] and self.player.canJump:
+        if pressedKeys[pygame.K_SPACE] and self.player.canJump and not self.player.Colid['ncolid-b']:
             self.player.yAcc = 22 if (self.player.yAcc > 4) else 18  
             self.player.canJump = 0
         elif self.player.yAcc > -10:
@@ -170,20 +170,19 @@ class gameOrquestrator:
         # print((str)(self.player.rect.size))
 
         preColisionFix = self.player.preBCollid.colliderect(self.fixGround.colisor)
-        clipedLine = self.fixGround.colisor.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1])), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1])))
+        collision = self.player.colidLines["bLine"].colliderect(self.fixGround.colisor)
 
         print(preColisionFix)
-        if (clipedLine):
-            self.player.Colid['ncolid-b'] = 0
-        elif (preColisionFix):
+        if (preColisionFix):
             self.player.preColid['nprecolid-b'] = 0
+        if (collision):
+            self.player.Colid['ncolid-b'] = 0
         else:    
             for Chunk in self.chunksGroup:
-                for Tile in Chunk.Tiles: 
-                    if (Tile.rect.clipline((self.player.xPos, self.player.yPos - (self.player.rect.size[1])), (self.player.xPos + self.player.rect.size[0], self.player.yPos - (self.player.rect.size[1])))):
-                        self.player.Colid['ncolid-b'] = 0
-                    elif (Tile.rect.colliderect(self.player.preBCollid)):
-                        self.player.preColid['nprecolid-b'] = 0
+                if (self.player.colidLines['bLine'].collidelist(Chunk.TilesColisors) > 0):
+                    self.player.Colid['ncolid-b'] = 0
+                if (self.player.preBCollid.collidelist(Chunk.TilesColisors) > 0):
+                    self.player.preColid['nprecolid-b'] = 0
 
 
     def drawColisors(self):

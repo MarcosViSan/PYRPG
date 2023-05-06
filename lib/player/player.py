@@ -23,7 +23,13 @@ class Player():
 
         self.direction = "r"
 
-        # self.colidLines =  [None for i in range(4)]
+        self.colidLines =  {
+            'tLine': pygame.rect.Rect(0,0,0,0),
+            'bLine': pygame.rect.Rect(0,0,0,-2),
+            'lLine': pygame.rect.Rect(0,0,0,-2),
+            'rLine': pygame.rect.Rect(0,0,0,0),
+        }
+
         self.image = None
         self.rect = None
         self.xPos = 500
@@ -77,7 +83,10 @@ class Player():
         self.getAnimationState()
 
         self.image, self.rect = self.getAnimationState()
-        self.preBCollid.update(self.xPos, (self.yPos - self.rect.size[1] * 0.75),self.rect.size[0], -20)
+        self.preBCollid.update(self.xPos, (self.yPos - self.rect.size[1] * 0.75),self.rect.size[0], -30)
+
+        self.colidLines["bLine"].update(self.xPos + 15, self.yPos - self.rect.size[1], self.rect.size[0] - 15, -2)
+
 
         # print(self.yPos, self.xPos)
         # print(self.yAcc, self.xAcc)
@@ -119,6 +128,7 @@ class Player():
             self.xVelocity = 0
         elif (self.xVelocity < 0 and not self.Colid['ncolid-l']):
             self.xVelocity = 0
+            
         if (self.yVelocity > 0 and not self.Colid['ncolid-t']):
             self.yVelocity = 0
         elif (self.yVelocity < 0 and not self.Colid['ncolid-b']):
@@ -146,8 +156,6 @@ class Player():
         if (self.yVelocity < self.yMinVelocity):
             self.yVelocity += 4
             print("---------------------> " + (str)(self.yVelocity))
-        elif (self.yVelocity > self.yMaxVelocity):
-            self.yVelocity -= 4
 
 
         # self.colidLines[0] = pygame.li

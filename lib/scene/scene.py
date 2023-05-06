@@ -33,7 +33,7 @@ class TileGround(pygame.sprite.Sprite):
         
         self.rect = self.image.get_rect()
         # print(self.rect.size)
-        self.rect.update(self.xPos, self.yPos, 144, -10)
+        self.rect.update(self.xPos, self.yPos, 144, -8)
 
 
 
@@ -41,10 +41,18 @@ class Chunk():
     def __init__(self):
         self.Tiles = pygame.sprite.Group()
 
+        self.TilesColisors: list[pygame.rect.Rect] = [pygame.rect.Rect(0,0,0,0)]
+
     def genChunk(self, initY: int):
         for i in range(8):
-            self.Tiles.add(TileGround((random.randint(1, 1136), initY)))
-            self.Tiles.add(TileGround((random.randint(1, 1136), initY)))
+
+            tile1 = TileGround((random.randint(1, 1136), initY))
+            tile2 = TileGround((random.randint(1, 1136), initY))
+            self.Tiles.add(tile1)
+            self.Tiles.add(tile2)
+
+            self.TilesColisors.append(tile1.rect)
+            self.TilesColisors.append(tile2.rect)
             initY += 160
 
         return self

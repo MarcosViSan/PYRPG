@@ -2,7 +2,7 @@ class Camera():
 
     def __init__(self, windowSize):
 
-        self.yPos = windowSize[1]
+        self.yPos = windowSize[1] - 100
         self.xPos = 0
 
         self.yVelocity = 0
