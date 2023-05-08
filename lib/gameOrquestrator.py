@@ -133,16 +133,19 @@ class gameOrquestrator:
 
         pressedKeys = pygame.key.get_pressed()
 
-        if pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]:
+        if (pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]):
             self.player.xAcc = -2
-        elif pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]:
+            if (self.player.yAcc == 0): self.player.motionState = player.MotionState.walking
+        elif (pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]):
             self.player.xAcc = 2
+            if (self.player.yAcc == 0): self.player.motionState = player.MotionState.walking
         else:
             self.player.xAcc = 0
-
+            self.player.motionState = player.MotionState.stopped
         if pressedKeys[pygame.K_SPACE] and self.player.canJump and not self.player.Colid['ncolid-b']:
             self.player.yAcc = 22 if (self.player.yAcc > 4) else 18  
             self.player.canJump = 0
+            self.player.motionState = player.MotionState.jumping
         elif self.player.yAcc > -10:
             self.player.yAcc = -1
     

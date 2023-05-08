@@ -1,5 +1,6 @@
 import pygame
 import lib.player.animationsSprite as animationsSprite 
+from enum import Enum
 
 MAX_X_VEL = (10, -10)
 MAX_Y_VEL = (10, -10)
@@ -8,6 +9,8 @@ class Player():
 
     def __init__(self) -> None:
         #Propriedades acessadas e manipuladas pelo gameCore
+
+        self.motionState = MotionState.walking
         self.Colid = {
             'ncolid-t': 1,
             'ncolid-b': 1,
@@ -56,6 +59,11 @@ class Player():
         standingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-1.png").convert_alpha(), 2.5)
         standingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-2.png").convert_alpha(), 2.5)
 
+        fallingFrames = ['' for i in range(4)]
+        fallingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\falling\\falling-1.png").convert_alpha(), 2.5)
+        fallingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\falling\\falling-2.png").convert_alpha(), 2.5)
+        fallingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\falling\\falling-3.png").convert_alpha(), 2.5)
+        fallingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\falling\\falling-4.png").convert_alpha(), 2.5)
 
         walkingFrames = [ None for i in range(6)]
         walkingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-1.png").convert_alpha(), 2.5)
@@ -69,7 +77,8 @@ class Player():
         self.animation = {
             'standing': animationsSprite.StandingAnimation(standingFrames),
             'walking': animationsSprite.WalkingAnimation(walkingFrames),
-            'falling': 0
+            'falling': animationsSprite.WalkingAnimation(fallingFrames),
+            'jumping': animationsSprite.WalkingAnimation(fallingFrames)
         }
 
         self.xVelocity = 0
@@ -96,12 +105,15 @@ class Player():
         return self
 
     def getAnimationState(self) -> pygame.Surface:
-        if (self.xVelocity == 0 and self.yVelocity == 0):
+
+        if (self.xVelocity == 0 and self.yVelocity == 0 and self.motionState == MotionState.stopped):
             self.currentAnimation = 'standing'
-        elif (self.xVelocity == 0 and self.yVelocity > 0):
-            self.currentAnimation = 'standing'
-        elif (self.xVelocity != 0):
+        elif (self.yVelocity < 0 and self.motionState == MotionState.falling):
+            self.currentAnimation = 'falling'
+        elif (self.xVelocity != 0 and self.motionState == MotionState.walking):
             self.currentAnimation = 'walking'
+        elif (self.yVelocity > 0 and self.motionState == MotionState.jumping):
+            self.currentAnimation = 'jumping'
 
         if (self.xVelocity > 0):
             self.direction = "r"
@@ -161,8 +173,14 @@ class Player():
         # self.colidLines[0] = pygame.li
 
 
-        
-
+class MotionState(Enum):
+    stopped = 0,
+    walking = 1,
+    falling = 2,
+    jumping = 3,
+    throwing = 4,
+    damaging = 5,
+    flying = 6
 
 
     
