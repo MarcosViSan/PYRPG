@@ -14,6 +14,7 @@ FLAGS = DOUBLEBUF
 class gameOrquestrator:
     def __init__(self) -> None:
 
+
         pygame.init()
         self.logo = pygame.image.load(".\\assets\\nature-enviroment\PNG\Objects\grass3.png")
         # load and set the logo
@@ -22,6 +23,7 @@ class gameOrquestrator:
 
         self.chunksGroup = []
         self.chunksY = 160
+        self.target = [0,0]
 
         # create a surface on screen that has the size of 1280 x 720
         self.screen = pygame.display.set_mode((1280 ,720), FLAGS , 8)
@@ -56,6 +58,7 @@ class gameOrquestrator:
         # main loop
         while self.running:
             # event handling, gets all event from the event queue
+                # self.update()
                 self.updatePlayer(pygame.event.get())
                 self.updateCamera()
                 self.updateScene()
@@ -72,7 +75,8 @@ class gameOrquestrator:
 
                 pygame.display.update()
                 self.fps = 1000 / self.clock.tick(FPS)
-                print(gameInfoText)
+                # print(gameInfoText)
+
 
     def drawScene(self):
 
@@ -120,6 +124,8 @@ class gameOrquestrator:
         self.player.xAcc = 0
         self.player.yAcc = 2
 
+        self.target = pygame.mouse.get_pos()
+
         self.player.xMaxVelocity = 6
         self.player.xMinVelocity = -6
 
@@ -135,10 +141,10 @@ class gameOrquestrator:
 
         if (pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]):
             self.player.xAcc = -2
-            if (self.player.yAcc == 0): self.player.motionState = player.MotionState.walking
+            if (self.player.yVelocity == 0): self.player.motionState = player.MotionState.walking
         elif (pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]):
             self.player.xAcc = 2
-            if (self.player.yAcc == 0): self.player.motionState = player.MotionState.walking
+            if (self.player.yVelocity == 0): self.player.motionState = player.MotionState.walking
         else:
             self.player.xAcc = 0
             self.player.motionState = player.MotionState.stopped
@@ -148,6 +154,8 @@ class gameOrquestrator:
             self.player.motionState = player.MotionState.jumping
         elif self.player.yAcc > -10:
             self.player.yAcc = -1
+
+        if (self.player.yVelocity < 0): self.player.motionState = player.MotionState.falling
     
         for event in events:
                 # only do something if the event is of type QUIT
@@ -158,6 +166,10 @@ class gameOrquestrator:
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_SPACE:
                         self.player.canJump = 1
+
+                if event.type == pygame.MOUSEBUTTONUP and self.player.rocks > 0:
+                    self.player.motionState = player.MotionState.throwing
+                    self.player.canShoot = 1 
 
         self.player.update()
 
@@ -175,7 +187,7 @@ class gameOrquestrator:
         preColisionFix = self.player.preBCollid.colliderect(self.fixGround.colisor)
         collision = self.player.colidLines["bLine"].colliderect(self.fixGround.colisor)
 
-        print(preColisionFix)
+        # print(preColisionFix)
         if (preColisionFix):
             self.player.preColid['nprecolid-b'] = 0
         if (collision):
@@ -196,7 +208,7 @@ class gameOrquestrator:
     def generateChunk(self):
 
         self.chunksGroup.append(scene.Chunk().genChunk(self.chunksY))
-        self.chunksY += 1300
+        self.chunksY += 1280
 
         if (len(self.chunksGroup) > 5):
             self.chunksGroup.pop(0)
