@@ -25,7 +25,7 @@ class StandingAnimation(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.animationItt += 1
 
-        return self.image, self.rect
+        return self.image, self.rect, False
 
 class WalkingAnimation(pygame.sprite.Sprite):
     
@@ -36,7 +36,7 @@ class WalkingAnimation(pygame.sprite.Sprite):
         self.image = frames[0]  # just to prevent some errors
         self.rect = self.image.get_rect()    # same here
         self.playing = 0
-        self.animationClock = 5
+        self.animationClock = 3
         self.animationItt = 0
          
     def update(self,  inverted: bool) -> pygame.Surface:
@@ -51,7 +51,7 @@ class WalkingAnimation(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.animationItt += 1
 
-        return self.image, self.rect
+        return self.image, self.rect, False
     
 class FallingAnimation(pygame.sprite.Sprite):
        
@@ -63,7 +63,7 @@ class FallingAnimation(pygame.sprite.Sprite):
         self.image = frames[0]  # just to prevent some errors
         self.rect = self.image.get_rect()    # same here
         self.playing = 0
-        self.animationClock = 17
+        self.animationClock = 9
         self.animationItt = 0
          
     def update(self, inverted: bool) -> pygame.Surface:        
@@ -80,7 +80,7 @@ class FallingAnimation(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.animationItt += 1
 
-        return self.image, self.rect
+        return self.image, self.rect, False
     
 
 class JumpingAnimation(pygame.sprite.Sprite):
@@ -93,7 +93,7 @@ class JumpingAnimation(pygame.sprite.Sprite):
         self.image = frames[0]  # just to prevent some errors
         self.rect = self.image.get_rect()    # same here
         self.playing = 0
-        self.animationClock = 8
+        self.animationClock = 16
         self.animationItt = 0
          
     def update(self, inverted: bool) -> pygame.Surface:        
@@ -108,7 +108,7 @@ class JumpingAnimation(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.animationItt += 1
 
-        return self.image, self.rect
+        return self.image, self.rect, False
     
 
 class ShootingAnimation(pygame.sprite.Sprite):
@@ -121,13 +121,16 @@ class ShootingAnimation(pygame.sprite.Sprite):
         self.image = frames[0]  # just to prevent some errors
         self.rect = self.image.get_rect()    # same here
         self.playing = 0
-        self.animationClock = 15
+        self.animationClock = 4
         self.animationItt = 0
+
+        self.finished = False
          
     def update(self, inverted: bool) -> pygame.Surface:        
         if (self.animationItt > self.animationClock):
             self.current += 1
             if self.current == len(self.frames):
+                self.finished = True
                 self.current = 0
             self.animationItt = 0
 
@@ -136,4 +139,4 @@ class ShootingAnimation(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.animationItt += 1
 
-        return self.image, self.rect
+        return self.image, self.rect, not self.finished

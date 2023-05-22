@@ -42,6 +42,8 @@ class Player():
 
         self.rocks = 3
 
+        self.BlockChange = False
+
         self.preBCollid = pygame.rect.Rect(0,0,0,0)
 
         self.xScreenPos = 0
@@ -108,9 +110,8 @@ class Player():
     def update(self):
         self.phyAttualize()
         self.move()
-        self.getAnimationState()
 
-        self.image, self.rect = self.getAnimationState()
+        self.image, self.rect, self.BlockChange = self.getAnimationState()
         self.preBCollid.update(self.xPos, (self.yPos - self.rect.size[1] * 0.75),self.rect.size[0], -30)
 
         self.colidLines["bLine"].update(self.xPos + 15, self.yPos - self.rect.size[1], self.rect.size[0] - 15, -2)
@@ -125,14 +126,20 @@ class Player():
 
     def getAnimationState(self) -> pygame.Surface:
 
-        if (self.xVelocity == 0 and self.yVelocity == 0 and self.motionState == MotionState.stopped):
-            self.currentAnimation = 'standing'
-        elif (self.yVelocity < 0 and self.motionState == MotionState.falling):
-            self.currentAnimation = 'falling'
-        elif (self.xVelocity != 0 and self.motionState == MotionState.walking):
-            self.currentAnimation = 'walking'
-        elif (self.yVelocity > 0 and self.motionState == MotionState.jumping):
-            self.currentAnimation = 'jumping'
+        if(not self.BlockChange):
+
+            if (self.xVelocity == 0 and self.yVelocity == 0 and self.motionState == MotionState.stopped):
+                self.currentAnimation = 'standing'
+            elif (self.yVelocity < 0 and self.motionState == MotionState.falling):
+                self.currentAnimation = 'falling'
+            elif (self.xVelocity != 0 and self.motionState == MotionState.walking):
+                self.currentAnimation = 'walking'
+            elif (self.yVelocity > 0 and self.motionState == MotionState.jumping):
+                self.currentAnimation = 'jumping'
+            if (self.motionState == MotionState.shooting):
+                self.animation['shooting'].finished = False
+                self.currentAnimation = 'shooting'
+                self.BlockChange = True
 
         if (self.xVelocity > 0):
             self.direction = "r"
@@ -197,7 +204,7 @@ class MotionState(Enum):
     walking = 1,
     falling = 2,
     jumping = 3,
-    throwing = 4,
+    shooting = 4,
     damaging = 5,
     flying = 6
 

@@ -124,7 +124,9 @@ class gameOrquestrator:
         self.player.xAcc = 0
         self.player.yAcc = 2
 
-        self.target = pygame.mouse.get_pos()
+        mousePos = pygame.mouse.get_pos()
+
+        self.targetPos = (mousePos[0] - self.camera.xPos, self.camera.xPos - mousePos[1])
 
         self.player.xMaxVelocity = 6
         self.player.xMinVelocity = -6
@@ -168,8 +170,10 @@ class gameOrquestrator:
                         self.player.canJump = 1
 
                 if event.type == pygame.MOUSEBUTTONUP and self.player.rocks > 0:
-                    self.player.motionState = player.MotionState.throwing
-                    self.player.canShoot = 1 
+                    if (self.targetPos[0] < self.player.xPos): self.player.direction = "l"
+                    if (self.targetPos[0] > self.player.xPos): self.player.direction = "r"
+                    self.player.motionState = player.MotionState.shooting
+                    self.player.canShoot = 1
 
         self.player.update()
 

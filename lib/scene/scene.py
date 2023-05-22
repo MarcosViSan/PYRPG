@@ -30,6 +30,7 @@ class TileGround(pygame.sprite.Sprite):
         self.yScreenPos = 0
 
         self.image = pygame.image.load("assets\\nature-enviroment\\PNG\\TileNvl1.png").convert()
+        pygame.Surface.set_colorkey(self.image, (0, 0 ,0))
         
         self.rect = self.image.get_rect()
         # print(self.rect.size)
