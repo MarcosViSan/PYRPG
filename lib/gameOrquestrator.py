@@ -2,6 +2,7 @@ import lib.scene.background as background
 import pygame
 import lib.player.player as player
 import lib.camera as camera
+import lib.scene.objectsAndEffects as objFx
 import lib.scene.scene as scene
 
 from pygame.locals import *
@@ -24,6 +25,11 @@ class gameOrquestrator:
         self.chunksGroup = []
         self.chunksY = 160
         self.target = [0,0]
+
+        self.effectsAndObjects = {
+            "Rocks": [],
+            "Lazer": []
+        }
 
         # create a surface on screen that has the size of 1280 x 720
         self.screen = pygame.display.set_mode((1280 ,720), FLAGS , 8)
@@ -62,8 +68,10 @@ class gameOrquestrator:
                 self.updatePlayer(pygame.event.get())
                 self.updateCamera()
                 self.updateScene()
+                self.updateObjectsAndEffects()
                 self.checkColision()
                 self.drawScene()
+                self.drawObjectsAndEffects()
                 # self.drawColisors()
 
 
@@ -98,6 +106,10 @@ class gameOrquestrator:
 
         self.screen.blit(self.player.image, (self.player.xScreenPos, self.player.yScreenPos))
 
+    def drawObjectsAndEffects(self):
+        for item in self.effectsAndObjects["Rocks"]:
+            self.screen.blit(item.image, (item.xPos, (self.camera.yPos - item.yPos)))
+
     def updateScene(self):
         self.fixGround.update()
         
@@ -107,6 +119,14 @@ class gameOrquestrator:
         if (self.player.yPos >= self.chunksY - 400):
             self.generateChunk()
             # self.destroyChunk()
+
+    def updateObjectsAndEffects(self):
+        for item in self.effectsAndObjects["Rocks"]:
+            item.update()
+            for Chunk in self.chunksGroup:
+                    if (item.rect.collidelist(Chunk.TilesColisors) > 0):
+                        print("colided")
+            
 
     def updateCamera(self):
         self.camera.xAcc = 0
@@ -126,7 +146,9 @@ class gameOrquestrator:
 
         mousePos = pygame.mouse.get_pos()
 
-        self.targetPos = (mousePos[0] - self.camera.xPos, self.camera.xPos - mousePos[1])
+        # print(mousePos)
+
+        self.targetPos = (mousePos[0] - self.camera.xPos, self.camera.yPos - mousePos[1])
 
         self.player.xMaxVelocity = 6
         self.player.xMinVelocity = -6
@@ -169,7 +191,8 @@ class gameOrquestrator:
                     if event.key == pygame.K_SPACE:
                         self.player.canJump = 1
 
-                if event.type == pygame.MOUSEBUTTONUP and self.player.rocks > 0:
+                if event.type == pygame.MOUSEBUTTONUP and self.player.rocks > 0 and len(self.effectsAndObjects["Rocks"]) < 1500:
+                    self.effectsAndObjects["Rocks"].append(objFx.Rock(self.targetPos[0] - self.player.xPos, self.targetPos[1] - self.player.yPos, self.player.xPos, self.player.yPos)) 
                     if (self.targetPos[0] < self.player.xPos): self.player.direction = "l"
                     if (self.targetPos[0] > self.player.xPos): self.player.direction = "r"
                     self.player.motionState = player.MotionState.shooting
@@ -196,10 +219,12 @@ class gameOrquestrator:
             self.player.preColid['nprecolid-b'] = 0
         if (collision):
             self.player.Colid['ncolid-b'] = 0
+            self.player.motionState = player.MotionState.landing
         else:    
             for Chunk in self.chunksGroup:
                 if (self.player.colidLines['bLine'].collidelist(Chunk.TilesColisors) > 0):
                     self.player.Colid['ncolid-b'] = 0
+                    self.player.motionState = player.MotionState.landing
                 if (self.player.preBCollid.collidelist(Chunk.TilesColisors) > 0):
                     self.player.preColid['nprecolid-b'] = 0
 
