@@ -124,8 +124,8 @@ class gameOrquestrator:
         for item in self.effectsAndObjects["Rocks"]:
             item.update()
             for Chunk in self.chunksGroup:
-                    if (item.rect.collidelist(Chunk.TilesColisors) > 0):
-                        print("colided")
+                    if (item.rect.collidelist(Chunk.FullColisors) > 0):
+                        self.effectsAndObjects["Rocks"].remove(item)
             
 
     def updateCamera(self):

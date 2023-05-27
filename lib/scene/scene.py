@@ -33,6 +33,8 @@ class TileGround(pygame.sprite.Sprite):
         pygame.Surface.set_colorkey(self.image, (0, 0 ,0))
         
         self.rect = self.image.get_rect()
+
+        self.fullRect = self.rect
         # print(self.rect.size)
         self.rect.update(self.xPos, self.yPos, 144, -8)
 
@@ -43,6 +45,7 @@ class Chunk():
         self.Tiles = pygame.sprite.Group()
 
         self.TilesColisors: list[pygame.rect.Rect] = [pygame.rect.Rect(0,0,0,0)]
+        self.FullColisors: list[pygame.rect.Rect] = [pygame.rect.Rect(0,0,0,0)]
 
     def genChunk(self, initY: int):
         for i in range(8):
@@ -54,6 +57,9 @@ class Chunk():
 
             self.TilesColisors.append(tile1.rect)
             self.TilesColisors.append(tile2.rect)
+
+            self.FullColisors.append(tile1.fullRect)
+            self.FullColisors.append(tile2.fullRect)
             initY += 160
 
         return self

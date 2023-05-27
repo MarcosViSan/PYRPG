@@ -8,24 +8,32 @@ class Rock(pygame.sprite.Sprite):
         self.yPos = pyPos
         self.xPos = pxPos
 
+        print(catAdj, catOpp)
+
         self.trajetory = math.sqrt(abs(math.pow(catAdj, 2) + math.pow(catOpp, 2)))
 
         self.yVelocity = 0
         self.xVelocity = 0
         
-        self.xAcc = math.ceil(10 * (catAdj / self.trajetory)) 
-        self.yAcc = math.ceil(10 * (catOpp / self.trajetory))
+        self.xAcc = 14 * (catAdj / self.trajetory)
+        self.yAcc = 14 * (catOpp / self.trajetory)
+
+        print(self.xAcc)
+        print(self.yAcc)
+
 
         # print(catAdj, catOpp, self.trajetory)
 
-        self.xMinVelocity = -abs(math.ceil(10 * (catAdj / self.trajetory))) 
-        self.xMaxVelocity = abs(math.ceil(10 * (catAdj / self.trajetory)))
+        self.xMinVelocity = -abs(14 * (catAdj / self.trajetory))
+        self.xMaxVelocity = abs(14 * (catAdj / self.trajetory))
 
-        self.yMinVelocity = -abs(math.ceil(10 * (catOpp / self.trajetory)))
-        self.yMaxVelocity = abs(math.ceil(10 * (catOpp / self.trajetory)))
+        self.yMinVelocity = -abs(14 * (catOpp / self.trajetory))
+        self.yMaxVelocity = abs(14 * (catOpp / self.trajetory))
 
         self.image = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\Rock1.png"), 2.5)
         self.rect = self.image.get_rect()
+
+        self.rect.update(self.xPos, self.yPos, self.rect.width, self.rect.height * -1)
 
     def update(self):
         if (self.xVelocity != 0):
@@ -45,7 +53,9 @@ class Rock(pygame.sprite.Sprite):
             self.xVelocity += self.xAcc
 
         # print(self.rect.size)
-        self.rect.move_ip(self.xPos, self.yPos)
+        # self.rect.move_ip(self.xPos, self.yPos)
+
+        self.rect.x, self.rect.y = self.xPos, self.yPos
         
         if (self.yVelocity < self.yMinVelocity):
             self.yVelocity += 2
