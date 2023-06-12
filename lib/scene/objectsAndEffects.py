@@ -8,7 +8,7 @@ class Rock(pygame.sprite.Sprite):
         self.yPos = pyPos
         self.xPos = pxPos
 
-        print(catAdj, catOpp)
+        # print(catAdj, catOpp)
 
         self.trajetory = math.sqrt(abs(math.pow(catAdj, 2) + math.pow(catOpp, 2)))
 
@@ -18,8 +18,8 @@ class Rock(pygame.sprite.Sprite):
         self.xAcc = 14 * (catAdj / self.trajetory)
         self.yAcc = 14 * (catOpp / self.trajetory)
 
-        print(self.xAcc)
-        print(self.yAcc)
+        # print(self.xAcc)
+        # print(self.yAcc)
 
 
         # print(catAdj, catOpp, self.trajetory)

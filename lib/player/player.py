@@ -25,6 +25,7 @@ class Player():
         }
 
         self.direction = "r"
+        self.damagingTime = 0
 
         self.colidLines =  {
             'tLine': pygame.rect.Rect(0,0,0,0),
@@ -41,6 +42,10 @@ class Player():
         self.yAcc = 0
 
         self.rocks = 2200
+
+        self.life = 3
+
+        self.damageCoolDown = 0
 
         self.blockChange = False
 
@@ -134,6 +139,11 @@ class Player():
 
         self.colidLines["bLine"].update(self.xPos + 15, self.yPos - self.rect.size[1], self.rect.size[0] - 15, -2)
 
+        self.rect.x, self.rect.y = self.xPos, self.yPos
+
+        if (self.damageCoolDown > 0): self.damageCoolDown -= 1
+
+        if (self.damagingTime > 0): self.damagingTime -= 1
 
         # print(self.yPos, self.xPos)
         # print(self.yAcc, self.xAcc)
