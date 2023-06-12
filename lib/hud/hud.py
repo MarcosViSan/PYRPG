@@ -16,15 +16,22 @@ class HudinGame():
             Option("Sair", (self.screen.get_width()*0.425, self.screen.get_height()*0.700), 3),
         ]
 
-    def update(self):
+    def update(self, events):
 
         mousePos = pygame.mouse.get_pos()
 
         self.screen.fill((0,0,0))
 
+        events = events
+        
         for option in self.options:
             if option.rect.collidepoint(mousePos):
                 option.hover = True
+                print(str(events))
+                for event in events:
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        option.clicked = True
+                        print(option.text)
             else:
                 option.hover = False
             
@@ -35,8 +42,6 @@ class HudinGame():
 
             self.writeText(option.text, (190, 225, 255), (option.xPos, option.yPos), option.size)
     
-
-
 
     def writeText(self,text, fontColor, coord: tuple, fontSiz: int = 20, border = True, borderColor: tuple = (1,1,1)):
 
@@ -60,6 +65,8 @@ class Option():
 
         self.val = val
         self.hover = False
+
+        self.clicked = False
 
         self.rect = pygame.rect.Rect(self.xPos, self.yPos, 300, 25)
 

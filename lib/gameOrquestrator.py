@@ -15,7 +15,7 @@ FLAGS = DOUBLEBUF
 
 
 
-class gameOrquestrator:
+class GameOrquestrator:
     def __init__(self) -> None:
 
 
@@ -63,55 +63,62 @@ class gameOrquestrator:
 
         self.gameover = False
 
+        self.restart = False
+
+        self.showInfo = False
+
         self.looseArea = pygame.rect.Rect(0, self.camera.yPos - 1440, 1280, 80)
 
+        self.running = True
 
-    def main(self):
+
+    def main(self, events):
 
         # initialize the pygame module
-        pygame.init()
         # define a variable to control the main loop
-        self.running = True
         pygame.event.set_allowed([QUIT, KEYDOWN, KEYUP])
         
         # main loop
-        while self.running:
+        
             # event handling, gets all event from the event queue
                 # self.update()
-            events = pygame.event.get()
-            self.fps = 1000 / self.clock.tick(FPS)
+        events = events
+        self.fps = 1000 / self.clock.tick(FPS)
+        self.handleNoGame(events)
 
-            self.handleNoGame(events)
-
-            if not self.gameover and not self.hudInGame.opened:
-                self.updatePlayer(events)
-                self.updateCamera()
-                self.updateScene()
-                self.updateEnemies()
-                self.updateObjectsAndEffects()
-                self.checkColision()
-                self.drawScene()
-                self.drawObjectsAndEffects()
-                # self.drawColisors()
-
-                gameInfoText = "FPS: " + (str)((int)(self.fps)) + "   PlayerPOS: " + (str)(self.player.xPos) + "   " + (str)(self.player.yPos) + "    " + (str)(self.player.yMinVelocity) + "   " + (str)(self.player.yVelocity) + "   CamPOS: " + (str)(self.camera.xPos) + "   " + (str)(self.camera.yPos) + "     Chunks: " + str(len(self.chunksGroup)) + "   Enemies: " + str(len(self.enemies)) + " life " + str(self.player.life)
-                   
-                self.writeText(gameInfoText, (255, 255, 255), (0, 0), 24)
-                self.finalScreen.blit(self.gameScreen, (0, 0))
-
-                   # print(gameInfoText)
-                if self.player.life <= 0: self.gameover = True 
-            elif self.gameover:
-                self.gameScreen.fill((1,1,1))
-                self.writeText("Game Over", (255, 190, 190), (self.windowWidth*0.425, self.windowHeight/2), 35, True, (50, 50, 50)) 
-                self.finalScreen.blit(self.gameScreen, (0, 0))
+        if not self.gameover and not self.hudInGame.opened:
+            self.updatePlayer(events)
+            self.updateCamera()
+            self.updateScene()
+            self.updateEnemies()
+            self.updateObjectsAndEffects()
+            self.checkColision()
+            self.drawScene()
+            self.drawObjectsAndEffects()
+            # self.drawColisors()
+            gameInfoText = "FPS: " + (str)((int)(self.fps)) + "   PlayerPOS: " + (str)(self.player.xPos) + "   " + (str)(self.player.yPos) + "    " + (str)(self.player.yMinVelocity) + "   " + (str)(self.player.yVelocity) + "   CamPOS: " + (str)(self.camera.xPos) + "   " + (str)(self.camera.yPos) + "     Chunks: " + str(len(self.chunksGroup)) + "   Enemies: " + str(len(self.enemies)) + " life " + str(self.player.life)
             
-            if self.hudInGame.opened:
-                self.hudInGame.update()
-                self.finalScreen.blit(pygame.transform.grayscale(self.gameScreen), (0, 0))
-                self.finalScreen.blit(self.hudInGame.screen, (0, 0))
-                
-            pygame.display.update()
+            self.score = str(abs(self.player.yPos/10))
+
+            if (self.showInfo): self.writeText(gameInfoText, (255, 255, 255), (0, 0), 24)
+            self.writeText(self.score, (255, 255, 255), (0, 40), 20)
+
+            self.finalScreen.blit(self.gameScreen, (0, 0))
+               # print(gameInfoText)
+            if self.player.life <= 0: self.gameover = True 
+
+        elif self.gameover:
+            self.gameScreen.fill((1,1,1))
+            self.writeText("Game Over", (255, 190, 190), (self.windowWidth*0.425, self.windowHeight/2), 35, True, (50, 50, 50)) 
+            self.finalScreen.blit(self.gameScreen, (0, 0))
+
+        
+        if self.hudInGame.opened:
+            self.hudInGame.update(events)
+            self.finalScreen.blit(pygame.transform.grayscale(self.gameScreen), (0, 0))
+            self.finalScreen.blit(self.hudInGame.screen, (0, 0))
+            
+        pygame.display.update()
 
     def handleNoGame(self, events):
             for event in events:
@@ -119,10 +126,26 @@ class gameOrquestrator:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.hudInGame.opened = not self.hudInGame.opened 
+                    if event.key == pygame.K_F1:
+                        self.showInfo = not self.showInfo
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     self.running = False
                 # change the value to False, to exit the main loop
+
+            if (self.hudInGame.options[0].clicked):
+                self.hudInGame.opened = False
+                self.hudInGame.options[0].clicked = False
+            elif (self.hudInGame.options[1].clicked):
+                self.restart = True
+            elif (self.hudInGame.options[2].clicked):
+                self.hudInGame.opened = False
+                self.hudInGame.options[2].clicked = False
+            elif (self.hudInGame.options[3].clicked):
+                pygame.quit()
+                self.running = False
+
+            
 
     def drawScene(self):
 
@@ -149,7 +172,7 @@ class gameOrquestrator:
 
     def drawObjectsAndEffects(self):
         for item in self.effectsAndObjects["Rocks"]:
-            self.screen.blit(item.image, (item.xPos, (self.camera.yPos - item.yPos)))
+            self.gameScreen.blit(item.image, (item.xPos, (self.camera.yPos - item.yPos)))
 
     def drawEnemies(self):
         for item in self.enemies:
