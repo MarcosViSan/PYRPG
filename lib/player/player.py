@@ -64,6 +64,8 @@ class Player():
         #Propriedades Privadas
         self.currentAnimation = 'standing'
 
+        self.events = []
+
         standingFrames = ['' for i in range(2)]
         standingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-1.png").convert_alpha(), 2.5)
         standingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\standing\\standing-2.png").convert_alpha(), 2.5)
@@ -88,34 +90,20 @@ class Player():
         walkingFrames[4] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-5.png").convert_alpha(), 2.5)
         walkingFrames[5] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\walking\\walking-6.png").convert_alpha(), 2.5)
 
-        jumpingFrames = [ None for i in range(20)]
+        jumpingFrames = [ None for i in range(6)]
         jumpingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-1.png").convert_alpha(), 2.5)
         jumpingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-2.png").convert_alpha(), 2.5)
         jumpingFrames[2] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-3.png").convert_alpha(), 2.5)
         jumpingFrames[3] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-4.png").convert_alpha(), 2.5)
         jumpingFrames[4] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
         jumpingFrames[5] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[6] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[7] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[8] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[9] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[10] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[11] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[12] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[13] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[14] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[15] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[16] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[17] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[18] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
-        jumpingFrames[19] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\jumping\\jumping-5.png").convert_alpha(), 2.5)
         
         landingFrames = [ None for i in range(3)]
         landingFrames[0] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\landing\\landing-1.png").convert_alpha(), 2.5)
         landingFrames[1] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\landing\\landing-2.png").convert_alpha(), 2.5)
         landingFrames[2] = pygame.transform.scale_by(pygame.image.load("assets\\hero-sprites\\Pink_Monster\\landing\\landing-3.png").convert_alpha(), 2.5)
 
-        self.animation = {
+        self.animation: dict[str, any] = {
             'standing': animationsSprite.StandingAnimation(standingFrames),
             'walking': animationsSprite.WalkingAnimation(walkingFrames),
             'falling': animationsSprite.WalkingAnimation(fallingFrames),
@@ -124,6 +112,8 @@ class Player():
             'shooting': animationsSprite.ShootingAnimation(shootingFrames)
         }
 
+        self.animation['shooting'].eventPoints["shoot"] = 1
+        self.animation['jumping'].eventPoints["jump"] = 1
         self.xVelocity = 0
         self.yVelocity = 0
 
@@ -131,19 +121,25 @@ class Player():
         self.canShoot = 1
 
     def update(self):
+        self.events.clear()
+        # print(self.events)    
         self.phyAttualize()
         self.move()
 
         self.image, self.rect = self.getAnimationState()
+
+        self.events.extend(self.animation[self.currentAnimation].events)
         self.preBCollid.update(self.xPos, (self.yPos - self.rect.size[1] * 0.75),self.rect.size[0], -30)
 
         self.colidLines["bLine"].update(self.xPos + 15, self.yPos - self.rect.size[1], self.rect.size[0] - 15, -2)
 
-        self.rect.x, self.rect.y = self.xPos, self.yPos
+        self.rect.update(self.xPos, self.yPos, self.rect.width, self.rect.height * -1)
 
         if (self.damageCoolDown > 0): self.damageCoolDown -= 1
 
         if (self.damagingTime > 0): self.damagingTime -= 1
+
+        # print(self.damagingTime)
 
         # print(self.yPos, self.xPos)
         # print(self.yAcc, self.xAcc)
@@ -157,11 +153,11 @@ class Player():
         if(not self.blockChange):
             if (self.xVelocity == 0 and self.yVelocity == 0 and self.motionState == MotionState.stopped):
                 self.currentAnimation = 'standing'
-            elif (self.yVelocity < 0 and self.motionState == MotionState.falling):
+            elif (self.yVelocity != 0 and self.motionState == MotionState.falling):
                 self.currentAnimation = 'falling'
             elif (self.xVelocity != 0 and self.motionState == MotionState.walking):
                 self.currentAnimation = 'walking'
-            elif (self.yVelocity > 0 and self.motionState == MotionState.jumping):
+            elif (self.motionState == MotionState.jumping):
                 self.currentAnimation = 'jumping'
             if (self.motionState == MotionState.shooting):
                 self.currentAnimation = 'shooting'
@@ -244,6 +240,3 @@ class MotionState(Enum):
     damaging = 5,
     flying = 6,
     landing = 7
-
-
-    

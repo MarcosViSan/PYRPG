@@ -14,7 +14,6 @@ FPS = 60
 FLAGS = DOUBLEBUF
 
 
-
 class GameOrquestrator:
     def __init__(self) -> None:
 
@@ -33,12 +32,14 @@ class GameOrquestrator:
 
         self.effectsAndObjects = {
             "Rocks": [],
-            "Lazer": []
+            "Lazer": [],
+            "EnemyProjectiles": []
         }
 
         self.damageArea = [pygame.rect.Rect(0,0,0,0)]
 
-        self.enemies = []
+        self.enemies1 = []
+        self.enemies2 = []
 
         # create a surface on screen that has the size of 1280 x 720
         self.finalScreen = pygame.display.set_mode((1280 ,720), FLAGS , 8)
@@ -71,8 +72,10 @@ class GameOrquestrator:
 
         self.running = True
 
+        self.Gameinfo = pygame.font.Font("assets\\hero-sprites\\Font\\Planes_ValMore.ttf", 32)
 
     def main(self, events):
+
 
         # initialize the pygame module
         # define a variable to control the main loop
@@ -96,9 +99,9 @@ class GameOrquestrator:
             self.drawScene()
             self.drawObjectsAndEffects()
             # self.drawColisors()
-            gameInfoText = "FPS: " + (str)((int)(self.fps)) + "   PlayerPOS: " + (str)(self.player.xPos) + "   " + (str)(self.player.yPos) + "    " + (str)(self.player.yMinVelocity) + "   " + (str)(self.player.yVelocity) + "   CamPOS: " + (str)(self.camera.xPos) + "   " + (str)(self.camera.yPos) + "     Chunks: " + str(len(self.chunksGroup)) + "   Enemies: " + str(len(self.enemies)) + " life " + str(self.player.life)
+            gameInfoText = "FPS: " + (str)((int)(self.fps)) + "   PlayerPOS: " + (str)(self.player.xPos) + "   " + (str)(self.player.yPos) + "    " + (str)(self.player.yMinVelocity) + "   " + (str)(self.player.yVelocity) + "   CamPOS: " + (str)(self.camera.xPos) + "   " + (str)(self.camera.yPos) + "     Chunks: " + str(len(self.chunksGroup)) + "   Enemies: " + str(len(self.enemies1 + self.enemies2)) + " life " + str(self.player.life)
             
-            self.score = str(abs(self.player.yPos/10))
+            self.score = str(abs(int(self.player.yPos/100)))
 
             if (self.showInfo): self.writeText(gameInfoText, (255, 255, 255), (0, 0), 24)
             self.writeText(self.score, (255, 255, 255), (0, 40), 20)
@@ -152,6 +155,9 @@ class GameOrquestrator:
         for img in range(len(self.background.image)):
             self.gameScreen.blit(self.background.image[img], (0, 0))
 
+        # pygame.draw.rect(self.gameScreen, (0,0,0, 0.2), pygame.rect.Rect(0, 0, 1280, 720))
+
+
         tempXPos = -576
 
         for i in range(self.fixGround.blockArraySize):
@@ -166,7 +172,9 @@ class GameOrquestrator:
                 # print('drawed' + str(j)
         self.drawEnemies()
 
-        if(self.player.damagingTime > 0): self.player.image.fill((255,0,0), special_flags=pygame.BLEND_MULT)
+        if(self.player.damagingTime > 0):
+            self.player.image = self.player.image.copy()
+            self.player.image.fill((255,0,0), special_flags=pygame.BLEND_MULT)
         
         self.gameScreen.blit(self.player.image, (self.player.xScreenPos, self.player.yScreenPos))
 
@@ -174,8 +182,15 @@ class GameOrquestrator:
         for item in self.effectsAndObjects["Rocks"]:
             self.gameScreen.blit(item.image, (item.xPos, (self.camera.yPos - item.yPos)))
 
+        for item in self.effectsAndObjects["EnemyProjectiles"]:
+            self.gameScreen.blit(item.image, (item.xPos, (self.camera.yPos - item.yPos)))
+
     def drawEnemies(self):
-        for item in self.enemies:
+        for item in self.enemies1:
+            if(item.damagingTime > 0): item.image.fill((255,0,0), special_flags=pygame.BLEND_MULT)
+            self.gameScreen.blit(item.image, (item.xPos, (self.camera.yPos - item.yPos)))
+
+        for item in self.enemies2:
             if(item.damagingTime > 0): item.image.fill((255,0,0), special_flags=pygame.BLEND_MULT)
             self.gameScreen.blit(item.image, (item.xPos, (self.camera.yPos - item.yPos)))
 
@@ -195,7 +210,17 @@ class GameOrquestrator:
 
             keep = False
 
-            for enemy in self.enemies:
+            for enemy in self.enemies1:
+                if item.rect.colliderect(enemy.rect):
+                    self.effectsAndObjects["Rocks"].remove(item)
+                    enemy.life -= 1
+                    enemy.damagingTime = FPS * 0.15
+                    keep = True
+                    break
+
+            if keep: continue
+            
+            for enemy in self.enemies2:
                 if item.rect.colliderect(enemy.rect):
                     self.effectsAndObjects["Rocks"].remove(item)
                     enemy.life -= 1
@@ -208,6 +233,18 @@ class GameOrquestrator:
             for Chunk in self.chunksGroup:
                 if (item.rect.collidelist(Chunk.FullColisors) > 0):
                     self.effectsAndObjects["Rocks"].remove(item)
+
+
+        for item in self.effectsAndObjects["EnemyProjectiles"]:
+            item.update()
+
+            if (item.rect.colliderect(self.player.rect)):
+                self.player.life -= 1
+                self.player.damageCoolDown = FPS * 1.5
+            # self.player.motionState = player.MotionState.damaging
+                self.player.damagingTime = FPS * 0.15
+                # print("Hit by proj")
+                self.effectsAndObjects["EnemyProjectiles"].remove(item)
             
 
     def updateCamera(self):
@@ -244,6 +281,8 @@ class GameOrquestrator:
         self.camera.yMaxVelocity = 7.5
 
         pressedKeys = pygame.key.get_pressed()
+        
+        self.player.motionState = player.MotionState.falling
 
         if (pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]):
             self.player.xAcc = -2
@@ -251,18 +290,27 @@ class GameOrquestrator:
         elif (pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]):
             self.player.xAcc = 2
             if (self.player.yVelocity == 0): self.player.motionState = player.MotionState.walking
-        else:
+        elif self.player.yVelocity == 0 and not self.player.Colid['ncolid-b']:
             self.player.xAcc = 0
             self.player.motionState = player.MotionState.stopped
-        if pressedKeys[pygame.K_SPACE] and self.player.canJump and not self.player.Colid['ncolid-b']:
-            self.player.yAcc = 22 if (self.player.yAcc > 4) else 18  
+
+
+        if pressedKeys[pygame.K_SPACE] and self.player.canJump and not self.player.Colid['ncolid-b']: 
             self.player.canJump = 0
             self.player.motionState = player.MotionState.jumping
         elif self.player.yAcc > -10:
             self.player.yAcc = -1
 
-        if (self.player.yVelocity < 0): self.player.motionState = player.MotionState.falling
-    
+
+        # print(self.player.events)
+
+        for event in self.player.events:
+            if event == "shoot":
+                self.effectsAndObjects["Rocks"].append(objFx.Rock(self.targetPos[0] - self.player.xPos, self.targetPos[1] - self.player.yPos, self.player.xPos, self.player.yPos)) 
+            if event == "jump":
+                self.player.yAcc = 22 if (self.player.yAcc > 4) else 18 
+                # pass
+
         for event in events:
                 # only do something if the event is of type QUIT
                 if event.type == pygame.QUIT:
@@ -274,7 +322,6 @@ class GameOrquestrator:
                         self.player.canJump = 1
 
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.player.rocks > 0 and len(self.effectsAndObjects["Rocks"]) < 500:
-                    self.effectsAndObjects["Rocks"].append(objFx.Rock(self.targetPos[0] - self.player.xPos, self.targetPos[1] - self.player.yPos, self.player.xPos, self.player.yPos)) 
                     if (self.targetPos[0] < self.player.xPos): self.player.direction = "l"
                     if (self.targetPos[0] > self.player.xPos): self.player.direction = "r"
                     self.player.motionState = player.MotionState.shooting
@@ -292,7 +339,11 @@ class GameOrquestrator:
         self.player.Colid['ncolid-b'] = 1
         self.player.preColid['nprecolid-b'] = 1
 
-        for item in self.enemies:
+        for item in self.enemies1:
+            item.Colid['ncolid-b'] = 1
+            item.preColid['nprecolid-b'] = 1
+
+        for item in self.enemies2:
             item.Colid['ncolid-b'] = 1
             item.preColid['nprecolid-b'] = 1
 
@@ -310,6 +361,7 @@ class GameOrquestrator:
             self.player.damageCoolDown = FPS * 1.5
             # self.player.motionState = player.MotionState.damaging
             self.player.damagingTime = FPS * 0.15
+
         
         self.damageArea.clear()
         self.damageArea = [pygame.rect.Rect(0,0,0,0)]        
@@ -329,7 +381,13 @@ class GameOrquestrator:
             if (self.player.preBCollid.collidelist(Chunk.TilesColisors) > 0):
                 self.player.preColid['nprecolid-b'] = 0
 
-            for item in self.enemies:
+            for item in self.enemies1:
+                if (item.colidLines['bLine'].collidelist(Chunk.TilesColisors) > 0):
+                    item.Colid['ncolid-b'] = 0
+                if (item.preBCollid.collidelist(Chunk.TilesColisors) > 0):
+                    item.preColid['nprecolid-b'] = 0
+
+            for item in self.enemies2:
                 if (item.colidLines['bLine'].collidelist(Chunk.TilesColisors) > 0):
                     item.Colid['ncolid-b'] = 0
                 if (item.preBCollid.collidelist(Chunk.TilesColisors) > 0):
@@ -360,17 +418,28 @@ class GameOrquestrator:
 
         tile = tiles[random.randint(0, 1)]
 
-        self.enemies.append(enemies.EnemyLvl1(tile.fullRect.center, FPS))
+        self.enemies1.append(enemies.EnemyLvl1(tile.fullRect.center, 42))
+
+        self.enemies2.append(enemies.EnemyLvl2(tile.fullRect.center, 28))
 
         tile = tiles[random.randint(2, 3)]
 
-        self.enemies.append(enemies.EnemyLvl1(tile.fullRect.center, FPS))
+        self.enemies1.append(enemies.EnemyLvl1(tile.fullRect.center, 42))
 
-        if(len(self.enemies) > 9): self.enemies.pop(0)
+        if(len(self.enemies1) > 9): self.enemies1.pop(0)
+        if(len(self.enemies2) > 9): self.enemies2.pop(0)
 
 
     def updateEnemies(self):
-        for item in self.enemies:
+        for item in self.enemies1:
+
+            for event in item.events:
+                if event == "attack":
+                    if (item.direction == "l"):
+                        self.damageArea.append(pygame.rect.Rect(item.xPos + item.rect.width, item.yPos - 25, 25, 30))
+                    elif (item.direction == "r"):
+                        self.damageArea.append(pygame.rect.Rect(item.xPos - item.rect.width*0.5, item.yPos - 25, 30, 30))
+                    
 
             if (item.rect != None):
                 distanceToPlayer = abs(pygame.Vector2.distance_to(pygame.Vector2(item.rect.center), pygame.Vector2(self.player.rect.center)))
@@ -387,26 +456,23 @@ class GameOrquestrator:
             item.xMaxVelocity = 3
             item.xMinVelocity = -3
 
-            if(item.vision.collidepoint(self.player.xPos, self.player.yPos)):
-                if (distanceToPlayer > 80 and item.targetPos[0] < item.xPos):
-                    item.xAcc = -1
-                    item.motionState = enemies.MotionState.walking
-                
-                if (distanceToPlayer > 80 and item.targetPos[0] > item.xPos):
-                    item.xAcc = 1
-                    item.motionState = enemies.MotionState.walking
-            else:
-                item.xAcc = 0
-                item.motionState = enemies.MotionState.stopped
+            if item.motionState != enemies.MotionState.death:
+                if(item.vision.collidepoint(self.player.xPos, self.player.yPos)):
+                    if (distanceToPlayer > 80 and item.targetPos[0] < item.xPos):
+                        item.xAcc = -1
+                        item.motionState = enemies.MotionState.walking
+                    
+                    if (distanceToPlayer > 80 and item.targetPos[0] > item.xPos):
+                        item.xAcc = 1
+                        item.motionState = enemies.MotionState.walking
+                else:
+                    item.xAcc = 0
+                    item.motionState = enemies.MotionState.stopped
 
-            if (item.rect != None):
-                if((distanceToPlayer < 80) and item.attackCoolDown == 0):
-                    item.attackCoolDown = item.attackCoolDownFull 
-                    item.motionState = enemies.MotionState.attacking
-                if (item.direction == "l"):
-                    self.damageArea.append(pygame.rect.Rect(item.xPos + item.rect.width, item.yPos - 25, 20, 30))
-                elif (item.direction == "r"):
-                    self.damageArea.append(pygame.rect.Rect(item.xPos - item.rect.width*0.7, item.yPos - 25, 20, 30))
+                if (item.rect != None):
+                    if((distanceToPlayer < 80) and item.attackCoolDown == 0):
+                        item.attackCoolDown = item.attackCoolDownFull 
+                        item.motionState = enemies.MotionState.attacking
 
 
             item.yMaxVelocity = 16
@@ -415,23 +481,72 @@ class GameOrquestrator:
             if item.life < 1: 
                 item.motionState = enemies.MotionState.death
                 if item.deathTiming < 1:
-                    self.enemies.remove(item)
+                    self.enemies1.remove(item)
 
             item.update()
             # for Chunk in self.chunksGroup:
                     # if (item.rect.collidelist(Chunk.FullColisors) > 0):
-                    #     self.enemies.remove(item)
+                    #     self.enemies1.remove(item)
+
+
+
+        for item in self.enemies2:
+
+            for event in item.events:
+                if event == "attack":
+                    self.effectsAndObjects["EnemyProjectiles"].append(objFx.EnemyProjectile(self.player.xPos - item.xPos, self.player.yPos - item.yPos, item.xPos, item.yPos)) 
+                    
+
+            if (item.rect != None):
+                distanceToPlayer = abs(pygame.Vector2.distance_to(pygame.Vector2(item.rect.center), pygame.Vector2(self.player.rect.center)))
+
+            item.attackCoolDownFull = FPS * 2.5
+        
+            item.xAcc = 0
+            item.yAcc = -2
+
+            # print(mousePos)
+
+            item.targetPos = (self.player.xPos, self.player.yPos)
+
+            item.xMaxVelocity = 3
+            item.xMinVelocity = -3
+
+            if item.motionState != enemies.MotionState.death:
+                if(item.vision.collidepoint(self.player.xPos, self.player.yPos)):
+                    pass
+                else:
+                    item.xAcc = 0
+                    item.motionState = enemies.MotionState.stopped
+
+                if (item.rect != None):
+                    if((distanceToPlayer < 500) and item.attackCoolDown == 0):
+                        item.attackCoolDown = item.attackCoolDownFull 
+                        item.motionState = enemies.MotionState.attacking
+
+
+            item.yMaxVelocity = 16
+            item.yMinVelocity = -8 if item.preColid['nprecolid-b'] else -2
+
+            if item.life < 1: 
+                item.motionState = enemies.MotionState.death
+                if item.deathTiming < 1:
+                    self.enemies2.remove(item)
+
+            item.update()
+            # for Chunk in self.chunksGroup:
+                    # if (item.rect.collidelist(Chunk.FullColisors) > 0):
+                    #     self.enemies1.remove(item)
 
 
     def writeText(self,text, fontColor, coord: tuple, fontSiz: int = 20, border = True, borderColor: tuple = (0,0,0)):
 
-        font = pygame.font.Font("assets\\hero-sprites\\Font\\Planes_ValMore.ttf", fontSiz)
-        texto_renderizado = font.render(text, True, (0,0,0))
+        texto_renderizado = self.Gameinfo.render(text, True, (0,0,0))
         self.gameScreen.blit(texto_renderizado, (coord[0] - 2, coord[1] - 2))  # Desenha a borda
         self.gameScreen.blit(texto_renderizado, (coord[0] + 2, coord[1] - 2))  # Desenha a borda
         self.gameScreen.blit(texto_renderizado, (coord[0] - 2, coord[1] + 2))  # Desenha a borda
         self.gameScreen.blit(texto_renderizado, (coord[0] + 2, coord[1] + 2))  # Desenha a borda
 
         # Renderização do texto
-        texto_renderizado = font.render(text, True, fontColor)
+        texto_renderizado = self.Gameinfo.render(text, True, fontColor)
         self.gameScreen.blit(texto_renderizado, coord) 

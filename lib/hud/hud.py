@@ -7,7 +7,7 @@ class HudinGame():
 
         self.opened = False
 
-        print(str(self.screen.get_width()))
+        # print(str(self.screen.get_width()))
 
         self.options = [
             Option("Continuar", (self.screen.get_width()*0.425, self.screen.get_height()*0.400), 0),
@@ -27,18 +27,18 @@ class HudinGame():
         for option in self.options:
             if option.rect.collidepoint(mousePos):
                 option.hover = True
-                print(str(events))
+                # print(str(events))
                 for event in events:
                     if event.type == pygame.MOUSEBUTTONUP:
                         option.clicked = True
-                        print(option.text)
+                        # print(option.text)
             else:
                 option.hover = False
             
             if option.hover and option.size < option.maxSize:
-                option.size += 4
+                option.size += 2
             elif not option.hover and option.size > option.minSize:
-                option.size -= 4
+                option.size -= 2
 
             self.writeText(option.text, (190, 225, 255), (option.xPos, option.yPos), option.size)
     
@@ -71,5 +71,5 @@ class Option():
         self.rect = pygame.rect.Rect(self.xPos, self.yPos, 300, 25)
 
         self.size = 24
-        self.maxSize = 40
+        self.maxSize = 34
         self.minSize = 24
